@@ -1,63 +1,104 @@
-# 📚 Library Management System
+Library Management System 
+A robust, Java Swing-based desktop application designed to manage library operations. This system features a "Strict Mode" logic that handles book issuing, returns, fines, and blocks users based on overdue items or unpaid lost/damaged book penalties.
 
-A robust, Java-based desktop application designed to manage library operations efficiently. This system handles book inventory, member registration, and the issuing/returning of books using a MySQL database backend.
+🚀 Features
+Analyitcs Dashboard: Real-time counters for Total Issued, Returned, and Pending books.
+Smart Issue System:
+Stock Check: Prevents issuing if stock is 0.
+Limit Check: Restricts members to a maximum of 2 books.
+Strict Blocking: Automatically blocks users who have overdue books (>37 days) or unpaid "Lost/Damaged" fines.
+Return & Renew:
+Calculates fines automatically (₹10/day after 7 days).
+Allows book renewal if within limits.
+Lost & Damaged Handling:
+Reports incidents (Lost/Damaged).
+Grace Period Logic: Allows a 7-day grace period for reported lost books before blocking the user.
+Handles payments (₹500 for Lost, ₹300 for Damaged).
+Management: Simple forms to add new Books and Members.
 
-## 🚀 Features
+🛠️ Tech Stack
+Language: Java (JDK 8+)
+GUI: Java Swing & AWT
+Database: MySQL
+Connectivity: JDBC (Java Database Connectivity)
 
-* **Book Management:** Add new books, view available stock, and track genres/authors.
-* **Member Management:** Register new library members and view their unique Member IDs.
-* **Issue System:** Issue books to members with automatic stock validation (prevents issuing out-of-stock books).
-* **Return System:** Return books using a unique Transaction ID and automatically update inventory.
-* **Search & View:** Real-time tables to view Books, Members, and Active Transactions.
-* **Data Persistence:** All data is securely stored in a MySQL relational database.
+⚙️ Prerequisites
+Java Development Kit (JDK) installed.
+MySQL Server installed and running.
+MySQL JDBC Driver (mysql-connector-j-x.x.x.jar) added to your project's classpath.
 
-## 🛠️ Tech Stack
+🗄️ Database Setup (Crucial Step)
+The Java code assumes a specific database structure. Run the following SQL commands in your MySQL Workbench or Command Line to set it up:
 
-* **Language:** Java (JDK 8+)
-* **GUI:** Java Swing (JFrame, JTable, JTabbedPane)
-* **Database:** MySQL Server
-* **Connectivity:** JDBC (MySQL Connector/J)
-* **IDE:** Eclipse / IntelliJ IDEA / NetBeans
+SQL
 
-## ⚙️ Prerequisites
+CREATE DATABASE library_db;
+USE library_db;
 
-Before running the application, ensure you have the following installed:
-
-1.  **Java Development Kit (JDK)**
-2.  **MySQL Server** (Running locally on port 3306)
-3.  **MySQL Connector/J** (JDBC Driver added to your project's build path)
-
-## 📥 Installation & Setup
-
-### 1. Database Setup
-Open your MySQL Workbench or Terminal and run the following script to create the necessary database and tables:
-
-```sql
-CREATE DATABASE library_project;
-USE library_project;
-
+-- 1. Create Books Table
 CREATE TABLE books (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100),
     author VARCHAR(100),
-    genre VARCHAR(50),
     quantity INT
 );
 
+-- 2. Create Members Table
 CREATE TABLE members (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    member_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
-    email VARCHAR(100),
-    phone VARCHAR(20)
+    email VARCHAR(100)
 );
 
-CREATE TABLE transactions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+-- 3. Create Issue Records Table
+CREATE TABLE issue_records (
+    issue_id INT AUTO_INCREMENT PRIMARY KEY,
     book_id INT,
     member_id INT,
     issue_date DATE,
-    return_date DATE,
-    status VARCHAR(20),
-    FOREIGN KEY (book_id) REFERENCES books(id),
-    FOREIGN KEY (member_id) REFERENCES members(id)
+    return_date DATE DEFAULT NULL,
+    renewal_count INT DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'PENDING', -- PENDING, RETURNED, LOST, DAMAGED, REPORTED_LOST
+    fine_amount DOUBLE DEFAULT 0.0,
+    payment_status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, PAID
+    lost_report_date DATE DEFAULT NULL,
+    FOREIGN KEY (book_id) REFERENCES books(book_id),
+    FOREIGN KEY (member_id) REFERENCES members(member_id)
 );
+
+
+📝 Configuration
+Before running the application, ensure the database credentials in LibrarySystem.java match your local MySQL setup:
+
+Java
+
+// Located at the top of LibrarySystem.java
+private static final String URL = "jdbc:mysql://localhost:3306/library_db";
+private static final String USER = "root";       // Your MySQL Username
+private static final String PASS = "YourPassword"; // <--- CHANGE THIS
+
+🏃‍♂️ How to Run
+Clone/Download the repository.
+Open the project in an IDE (Eclipse, IntelliJ IDEA, or NetBeans).
+Add External JAR: Right-click project > Build Path > Add External Archives > Select your mysql-connector-java.jar.
+Run the LibrarySystem.java file as a Java Application.
+
+📜 Business Rules (Logic)
+Borrow Limit: A member cannot hold more than 2 books at a time.
+Fine Calculation: Books are issued for 7 days. After that, a fine of ₹10 per day is calculated.
+Overdue Block: If a book is held for more than 37 days (30 days past due), the user is blocked.
+Lost/Damaged Block:
+Reported Lost: User has a 7-day grace period to pay. After 7 days, they are blocked from borrowing new books.
+Confirmed Lost/Damaged: User is blocked immediately until the fine (₹500 or ₹300) is marked as "PAID".
+
+📸 Usage Guide
+Dashboard: Check the counters to see library health.
+Manage Books/Members: Go to these tabs first to add inventory and users.
+Issue Book: Enter Book ID and Member ID. The system will run 3 checks (Stock, Limit, Block Status) before issuing.
+Lost/Damaged: If a student reports a lost book, select "Report Only" to start the grace period, or "Pay & Close" to settle it immediately.
+
+🤝 Contributing
+Feel free to fork this project and submit pull requests. Suggestions for UI improvements or code optimization are welcome!
+
+📄 License
+This project is open-source and free to use for educational purposes.
