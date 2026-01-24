@@ -1,0 +1,63 @@
+# 📚 Library Management System
+
+A robust, Java-based desktop application designed to manage library operations efficiently. This system handles book inventory, member registration, and the issuing/returning of books using a MySQL database backend.
+
+## 🚀 Features
+
+* **Book Management:** Add new books, view available stock, and track genres/authors.
+* **Member Management:** Register new library members and view their unique Member IDs.
+* **Issue System:** Issue books to members with automatic stock validation (prevents issuing out-of-stock books).
+* **Return System:** Return books using a unique Transaction ID and automatically update inventory.
+* **Search & View:** Real-time tables to view Books, Members, and Active Transactions.
+* **Data Persistence:** All data is securely stored in a MySQL relational database.
+
+## 🛠️ Tech Stack
+
+* **Language:** Java (JDK 8+)
+* **GUI:** Java Swing (JFrame, JTable, JTabbedPane)
+* **Database:** MySQL Server
+* **Connectivity:** JDBC (MySQL Connector/J)
+* **IDE:** Eclipse / IntelliJ IDEA / NetBeans
+
+## ⚙️ Prerequisites
+
+Before running the application, ensure you have the following installed:
+
+1.  **Java Development Kit (JDK)**
+2.  **MySQL Server** (Running locally on port 3306)
+3.  **MySQL Connector/J** (JDBC Driver added to your project's build path)
+
+## 📥 Installation & Setup
+
+### 1. Database Setup
+Open your MySQL Workbench or Terminal and run the following script to create the necessary database and tables:
+
+```sql
+CREATE DATABASE library_project;
+USE library_project;
+
+CREATE TABLE books (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100),
+    author VARCHAR(100),
+    genre VARCHAR(50),
+    quantity INT
+);
+
+CREATE TABLE members (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(20)
+);
+
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    member_id INT,
+    issue_date DATE,
+    return_date DATE,
+    status VARCHAR(20),
+    FOREIGN KEY (book_id) REFERENCES books(id),
+    FOREIGN KEY (member_id) REFERENCES members(id)
+);
